@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 # Load the CSV
-filein='jinhuacha_with_mock_seed.csv'
+filein='raw.csv'
 
 df = pd.read_csv(filein)
 print(f'The number of samples in {filein}:',df.shape[0])

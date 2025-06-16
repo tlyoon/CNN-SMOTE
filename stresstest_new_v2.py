@@ -34,26 +34,32 @@ for line in lines:
 
 # Now resolve the value
 if value.isdigit():
-    print(f"Value of n_splits: {value}")
+    n_split = int(value)
+    #print(f"Value of n_splits: {value}")
+    print(f"1. Value of n_splits: {n_split}")
 else:
     # Look for variable assignment earlier in the file
     pattern = re.compile(rf"{value}\s*=\s*(\d+)")
     for line in lines:
         assign_match = pattern.search(line)
         if assign_match:
-            print(f"Value of n_splits: {assign_match.group(1)}")
+            #print(f"Value of n_splits: {assign_match.group(1)}")
             n_split = int(assign_match.group(1))
+            print(f"2. Value of n_splits: {n_split}")
             break
     else:
         print(f"Could not resolve value of variable '{value}'")
 
-
-for fold_no in range(n_split):
+#n_split=1
+for fold_no in range(n_split):    
     ##
     mpath = f"model_fold{fold_no}.h5" ## 'models/fold_5.keras'
     model = models.load_model(mpath)
     y_test = model.predict(X_test)
     yhat = np.argmax(y_test, axis=-1).astype('int')
+    print('y_test: ',y_test)
+    print(' ' )
+    print('yhat: ',yhat) 
     acc = accuracy_score(encoded_Y, yhat) * 100
     print('Accuracy: %.3f' % acc)
     
@@ -71,7 +77,7 @@ for fold_no in range(n_split):
         file.write('Confusion Matrix\n' + str(cm) + '\n' + '\nClassification Report \n' + report + '\n')
     
     ########## PLOT CONFUSION MATRIX ##################
-    plt.figure(figsize=(9, 7))
+    plt.figure(figsize=(7, 5))
     
     # Ensure correct class names
     target_names = list(encoder.classes_)  # Convert to list for indexing
@@ -80,18 +86,44 @@ for fold_no in range(n_split):
     cm = confusion_matrix(encoded_Y, yhat)
     
     # Plot heatmap with correctly mapped labels
-    ax = sns.heatmap(cm, annot=True, fmt="d", cmap="viridis", cbar=True, linewidths=1, linecolor="black")
+    #ax = sns.heatmap(cm, annot=True, fmt="d", cmap="viridis", cbar=True, linewidths=1, linecolor="black")
+    # Plot with explicit xtick/ytick order and proper tick labels
+    #ax = sns.heatmap(cm, annot=True, fmt="d", cmap="viridis", cbar=True, linewidths=1, linecolor="black", 
+    #             xticklabels=encoder.classes_, yticklabels=encoder.classes_)
     
-    ax.set_title('Classification Confusion Matrix\n')
-    ax.set_xlabel('Predicted Classification')
-    ax.set_ylabel('Ground Truth Classification')
+    vmin = cm.min()
+    vmax = cm.max()
+
+    # Generate heatmap with larger font size and correct labels
+    ax = sns.heatmap(
+    cm,
+    annot=True,
+    fmt='d',
+    cmap='Blues',         # or any sequential colormap such as 'Blues', 'YlGnBu'
+    cbar=True,
+    vmin=vmin,
+    vmax=vmax,
+    linewidths=0.5,
+    linecolor='black',
+    xticklabels=target_names,
+    yticklabels=target_names,
+    annot_kws={"size": 14}
+)
+
+#    ax.set_title('Classification Confusion Matrix\n')
+#    ax.set_xlabel('Predicted Classification')
+#    ax.set_ylabel('Ground Truth Classification')
     
-    # Correctly map class labels
-    ax.set_xticklabels(target_names, rotation=45, ha="right")
-    ax.set_yticklabels(target_names, rotation=0)
-    
-    # Save CM plot
+    ax.set_title('Classification Confusion Matrix', fontsize=16)
+    ax.set_xlabel('Predicted Classification', fontsize=14)
+    ax.set_ylabel('Ground Truth Classification', fontsize=14)
+
+    plt.xticks(rotation=45, ha="right", fontsize=12)
+    plt.yticks(rotation=0, fontsize=12)
+
+    plt.tight_layout()
     path = os.path.join(os.getcwd(), f'cm_plot_{fold_no}.png')
-    plt.savefig(path, dpi=300, bbox_inches='tight')
+    plt.savefig(path, dpi=300)
     plt.show()
     plt.close()
+

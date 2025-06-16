@@ -21,7 +21,7 @@ for i in range(1, run_nmax + 1):
             shutil.copy2(source_item, destination_item)
     os.chdir(destination_dir)
     #### do work in destination_dir
-    file = 'run_once.py'
+    file = 'run_local_bin.py' ##'run_once.py'
     print(f'Now running python {file} in {os.getcwd()} in {hostname}')
     
     result = subprocess.run(["python", file], capture_output=True, text=True)
